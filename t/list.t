@@ -4,6 +4,10 @@ use Test::More tests => 18;
 use Test::Exception;
 use MooseX::Method::Signatures;
 
+use FindBin;
+use lib "$FindBin::Bin/lib";
+use ErrValidate;
+
 my $o = bless {} => 'Foo';
 
 {
@@ -43,9 +47,9 @@ my $o = bless {} => 'Foo';
         is($o->${\$meth->body}('foo', 42, 23, 13), q{23,13});
     });
 
-    throws_ok(sub {
+    mxms_throws_ok(sub {
         $o->${\$meth->body}('foo', 42, 'moo', 13);
-    }, qr/Validation failed/);
+    }, 'main::__ANON__', qr/Validation failed/);
 }
 
 {
@@ -57,9 +61,9 @@ my $o = bless {} => 'Foo';
         is($o->${\$meth->body}([42, 23], [12], [18]), '42,23,12,18');
     });
 
-    throws_ok(sub {
+    mxms_throws_ok(sub {
         $o->${\$meth->body}([42, 23], 12, [18]);
-    }, qr/Validation failed/);
+    }, 'main::__ANON__', qr/Validation failed/);
 }
 
 {

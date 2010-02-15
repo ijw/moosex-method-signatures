@@ -1,7 +1,7 @@
 package MooseX::Method::Signatures::Meta::Method;
 
 use Moose;
-use Carp qw/cluck/;
+use Carp qw/croak cluck/;
 use Context::Preserve;
 use Parse::Method::Signatures;
 use Parse::Method::Signatures::TypeConstraint;
@@ -130,7 +130,9 @@ sub _wrapped_body {
 
     if (exists $args{return_signature}) {
         return sub {
-            my @args = ${ $self }->validate(\@_);
+            my ($err, @args) = ${ $self }->validate(\@_);
+	    croak $err if $err;
+	    
             return preserve_context { ${ $self }->actual_body->(@args) }
                 after => sub {
                     if (defined (my $msg = ${ $self }->_return_type_constraint->validate(\@_))) {
@@ -142,7 +144,10 @@ sub _wrapped_body {
 
     my $actual_body;
     return sub {
-        @_ = ${ $self }->validate(\@_);
+	my $err;
+        ($err, @_) = ${ $self }->validate(\@_);
+	croak $err if $err;
+	
         $actual_body ||= ${ $self }->actual_body;
         goto &{ $actual_body };
     };
@@ -407,7 +412,8 @@ sub _build_type_constraint {
 
             if (%named) {
                 my @rest = @{ $_ }[$i .. $#{ $_ }];
-                confess "Expected named arguments but didn't find an even-sized list"
+		# TODO needs adjusting to throw in correct context.
+                confess $self->_err_msg("Expected named arguments but didn't find an even-sized list")
                     unless @rest % 2 == 0;
                 my %rest = @rest;
 
@@ -443,10 +449,17 @@ sub validate {
 
     my $coerced;
     if (defined (my $msg = $self->type_constraint->validate($args, \$coerced))) {
-        confess $msg;
+        return $self->_err_msg($msg);
     }
 
-    return @{ $coerced->[0] }, map { $coerced->[1]->{$_} } @named;
+    return undef, @{ $coerced->[0] }, map { $coerced->[1]->{$_} } @named;
+}
+
+# Create the error message with locational details
+sub _err_msg {
+    my ($self, $msg)=@_;
+    
+    return "Signature validation failed for " . $self->package_name . "->" . $self->name . ": ". $msg;
 }
 
 __PACKAGE__->meta->make_immutable;

@@ -6,6 +6,8 @@ use Test::Exception;
 use FindBin;
 use lib "$FindBin::Bin/lib";
 
+use ErrValidate;
+
 use TestClass;
 use TestClassWithMxTypes;
 
@@ -41,7 +43,8 @@ dies_ok(sub { $o->affe('foo') });
 
 dies_ok(sub { $o->named });
 dies_ok(sub { $o->named(optional => 42) });
-throws_ok(sub { $o->named }, qr/\b at \b .* \b line \s+ \d+/x, "dies with proper exception");
+mxms_throws_ok(sub { $o->named }, 'TestClass::named', 
+	       qr/\b at \b .* \b line \s+ \d+/x, "dies with proper exception");
 
 lives_ok(sub {
     is_deeply(
