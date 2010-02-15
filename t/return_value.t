@@ -3,6 +3,10 @@ use warnings;
 use Test::More tests => 4;
 use Test::Exception;
 
+use FindBin;
+use lib "$FindBin::Bin/lib";
+use ErrValidate;
+
 use MooseX::Method::Signatures;
 
 my $o = bless {} => 'Foo';
@@ -13,9 +17,9 @@ my $o = bless {} => 'Foo';
     };
     isa_ok($meth, 'Moose::Meta::Method');
 
-    dies_ok(sub {
+    mxms_dies_ok(sub {
         $o->${\$meth->body}('foo')
-    });
+    }, 'main::__ANON__', qr/(?!return value)/);
 
     lives_and(sub {
         my $ret = $o->${\$meth->body}('foo', 3);
@@ -28,7 +32,7 @@ my $o = bless {} => 'Foo';
         return 42.5;
     };
 
-    dies_ok(sub {
+    mxms_throws_ok(sub {
         my $x = $o->${\$meth->body}('foo');
-    });
+    }, 'main::__ANON__', qr/return value/);
 }

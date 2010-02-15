@@ -21,8 +21,8 @@ my $o = bless {} => 'Foo';
     );
 
     for my $meth (@meths) {
-        dies_ok(sub { $o->${\$meth->body}() });
-        dies_ok(sub { $o->${\$meth->body}('foo') });
+        mxms_dies_ok(sub { $o->${\$meth->body}() }, 'main::__ANON__');
+        mxms_dies_ok(sub { $o->${\$meth->body}('foo') }, 'main::__ANON__');
 
         lives_and(sub {
             is($o->${\$meth->body}('foo', 'bar'), q{});

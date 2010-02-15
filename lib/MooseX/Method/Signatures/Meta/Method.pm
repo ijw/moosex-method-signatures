@@ -136,7 +136,7 @@ sub _wrapped_body {
             return preserve_context { ${ $self }->actual_body->(@args) }
                 after => sub {
                     if (defined (my $msg = ${ $self }->_return_type_constraint->validate(\@_))) {
-                        confess $msg;
+                        croak $ { $self }->_err_msg("return value - " . $msg);
                     }
                 };
         };

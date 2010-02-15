@@ -3,6 +3,10 @@ use warnings;
 use Test::More tests => 4;
 use Test::Exception;
 
+use FindBin;
+use lib "$FindBin::Bin/lib";
+use ErrValidate;
+
 {
     package MyTypes;
     use MooseX::Types::Moose qw/Str/;
@@ -31,7 +35,7 @@ use Test::Exception;
 my $o = bless {} => 'TestClass';
 
 lives_ok(sub { $o->foo('42') });
-dies_ok(sub { $o->foo('bar') });
+mxms_dies_ok(sub { $o->foo('bar') }, 'TestClass::foo');
 
 lives_ok(sub { $o->bar(['42', '23']) });
-dies_ok(sub { $o->bar(['foo', 'bar']) });
+mxms_dies_ok(sub { $o->bar(['foo', 'bar']) }, 'TestClass::bar');

@@ -3,6 +3,10 @@ use warnings;
 use Test::More tests => 3;
 use Test::Exception;
 
+use FindBin;
+use lib "$FindBin::Bin/lib";
+use ErrValidate;
+
 use MooseX::Method::Signatures::Meta::Method;
 
 {
@@ -27,6 +31,6 @@ lives_and(sub {
     is(Foo->bar(foo => 3, bar => 'baz'), 'bazbazbaz');
 });
 
-dies_ok(sub {
+mxms_dies_ok(sub {
     Foo->bar(foo => 'moo', bar => 'baz');
-});
+}, 'Foo::bar');

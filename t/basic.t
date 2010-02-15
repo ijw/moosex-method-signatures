@@ -11,9 +11,9 @@ use ErrValidate;
 use TestClass;
 use TestClassWithMxTypes;
 
-dies_ok(sub { TestClass->new });
-dies_ok(sub { TestClass->new('moo', 23) });
-dies_ok(sub { TestClass->new('moo', 8) });
+mxms_dies_ok(sub { TestClass->new }, 'TestClass::new');
+mxms_dies_ok(sub { TestClass->new('moo', 23) }, 'TestClass::new');
+mxms_dies_ok(sub { TestClass->new('moo', 8) }, 'TestClass::new');
 lives_ok(sub { TestClass->new('moo', 52) });
 
 my $o = TestClass->new('foo');
@@ -25,7 +25,7 @@ is($o->{bar}, 42);
 lives_ok(sub { $o->set_bar(23) });
 is($o->{bar}, 23);
 
-dies_ok(sub { $o->set_bar('bar') });
+mxms_dies_ok(sub { $o->set_bar('bar') }, 'TestClass::set_bar');
 
 {
     my $test_hash = { foo => 1 };
@@ -39,10 +39,10 @@ dies_ok(sub { $o->set_bar('bar') });
     is_deeply($o->{baz}, $test_array);
 }
 
-dies_ok(sub { $o->affe('foo') });
+mxms_dies_ok(sub { $o->affe('foo') }, 'TestClass::affe');
 
-dies_ok(sub { $o->named });
-dies_ok(sub { $o->named(optional => 42) });
+mxms_dies_ok(sub { $o->named }, 'TestClass::named');
+mxms_dies_ok(sub { $o->named(optional => 42) }, 'TestClass::named');
 mxms_throws_ok(sub { $o->named }, 'TestClass::named', 
 	       qr/\b at \b .* \b line \s+ \d+/x, "dies with proper exception");
 
@@ -60,8 +60,8 @@ lives_ok(sub {
     );
 });
 
-dies_ok(sub { $o->combined(1, 2) });
-dies_ok(sub { $o->combined(1, required => 2) });
+mxms_dies_ok(sub { $o->combined(1, 2) }, 'TestClass::combined');
+mxms_dies_ok(sub { $o->combined(1, required => 2) }, 'TestClass::combined');
 
 lives_ok(sub {
     is_deeply(
@@ -71,7 +71,7 @@ lives_ok(sub {
 });
 
 lives_ok(sub { $o->with_coercion({}) });
-dies_ok(sub { $o->without_coercion({}) });
+mxms_dies_ok(sub { $o->without_coercion({}) }, , 'TestClass::without_coercion');
 lives_ok(sub { $o->named_with_coercion(foo => bless({}, 'MyType')) });
 lives_ok(sub { $o->named_with_coercion(foo => {}) });
 
@@ -93,7 +93,7 @@ isa_ok($anon, 'Moose::Meta::Method');
 
 my $mxt =  TestClassWithMxTypes->new();
 
-dies_ok(sub { $mxt->with_coercion() });
+mxms_dies_ok(sub { $mxt->with_coercion() }, 'TestClassWithMxTypes::with_coercion');
 lives_ok(sub { $mxt->with_coercion('Str') });
 
 isa_ok( $mxt->with_coercion('Str'), q/Moose::Meta::TypeConstraint/ );
